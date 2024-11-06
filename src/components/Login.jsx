@@ -3,7 +3,7 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
-
+import { loginRequest } from "./utils/utils";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -26,29 +26,14 @@ const Login = () => {
       return;
     }
 
-    try {
-      // Request al servidor
-      const response = await fetch("https://test.silicon-access.com/fapi/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+    const result = await loginRequest(username, password);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Manejo del éxito del login
-        setMessage({ severity: "success", text: "Inicio de sesión exitoso." });
-        localStorage.setItem("user", JSON.stringify(data));
-        // Redirige a la sección privada o muestra datos adicionales si es necesario
-        window.location.href = "/dashboard";
-      } else {
-        setMessage({ severity: "error", text: data.message || "Credenciales incorrectas." });
-      }
-    } catch (error) {
-      setMessage({ severity: "error", text: "Ocurrió un error en la autenticación." });
+    if (result.success) {
+      setMessage({ severity: "success", text: "Inicio de sesión exitoso." });
+      localStorage.setItem("user", JSON.stringify(result.data));
+      window.location.href = "/dashboard";
+    } else {
+      setMessage({ severity: "error", text: result.data.message || "Credenciales incorrectas." });
     }
   };
 
